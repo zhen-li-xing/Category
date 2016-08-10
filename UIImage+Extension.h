@@ -54,4 +54,13 @@
  */
 + (UIImage *)screenShot;
 
+/**
+ *  根据url获取图片的尺寸(像素分辨率)
+ *
+ *  @param imageURL url地址
+ *
+ *  @return CGSize
+ */
++ (CGSize)getImageSizeWithURL:(id)imageURL
+
 @end
