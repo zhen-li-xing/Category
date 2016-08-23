@@ -7,6 +7,7 @@
 //
 
 #import "UIImage+Extension.h"
+#import "SDImageCache.h"
 
 @implementation UIImage (Extension)
 
@@ -140,7 +141,13 @@
     return screenShot;
 }
 
-// 根据图片url获取图片尺寸
+/**
+ *  根据图片url获取图片尺寸
+ *
+ *  @param imageURL imageURL description
+ *
+ *  @return size
+ */
 +(CGSize)getImageSizeWithURL:(id)imageURL
 {
     NSURL* URL = nil;
@@ -152,6 +159,19 @@
     }
     if(URL == nil)
         return CGSizeZero;     // url不正确返回CGSizeZero
+    NSString* absoluteString = URL.absoluteString;
+    
+    if([[SDImageCache sharedImageCache] diskImageExistsWithKey:absoluteString]){
+        
+        UIImage* image = [[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:absoluteString];
+        
+        if(image){
+            
+            return image.size;
+            
+        }
+        
+    }
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
     NSString* pathExtendsion = [URL.pathExtension lowercaseString];
