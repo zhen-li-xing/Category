@@ -40,6 +40,12 @@
  */
 @property (nonatomic) CGFloat right;
 
+/**
+ * 判断一个控件是否真正显示在主窗口
+ */
+- (BOOL)isShowingOnKeyWindow;
+
+
 - (void)addTarget:(id)target action:(SEL)action;
 
 

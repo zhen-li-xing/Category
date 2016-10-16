@@ -21,15 +21,15 @@
     //图片
     if (imageName != nil) {
         [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
-        NSString *highlighted = [NSString stringWithFormat:@"%@_highlighted", imageName];
-        [button setImage:[UIImage imageNamed:highlighted] forState:UIControlStateHighlighted];
+//        NSString *highlighted = [NSString stringWithFormat:@"%@_highlighted", imageName];
+//        [button setImage:[UIImage imageNamed:highlighted] forState:UIControlStateHighlighted];
     }
     //背景图片
     if (backImageName != nil) {
         [button setBackgroundImage:[UIImage imageNamed:backImageName] forState:UIControlStateNormal];
         
-        NSString *backHighlighted = [NSString stringWithFormat:@"%@_highlighted", backImageName];
-        [button setBackgroundImage:[UIImage imageNamed:backHighlighted] forState:UIControlStateHighlighted];
+//        NSString *backHighlighted = [NSString stringWithFormat:@"%@_highlighted", backImageName];
+//        [button setBackgroundImage:[UIImage imageNamed:backHighlighted] forState:UIControlStateHighlighted];
     }
     
     // 监听方法
@@ -58,8 +58,35 @@
 
 
 
++ (instancetype)buttonWithTitle:(NSString *)title titleColor:(UIColor *)titleColor fontSize:(CGFloat )size imageName:(NSString *)imageName HighlightedImageName:(NSString *)highName target:(id)target action:(SEL)action backImageName:(NSString *)backImageName{
+    UIButton * button = [[UIButton alloc] init];
+    //设置标题
+    [button setTitle:title forState:UIControlStateNormal];
+    [button setTitleColor:titleColor forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:size];
+    button.adjustsImageWhenHighlighted = NO;
+    //图片
+    if (imageName != nil) {
+        [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+        [button setImage:[UIImage imageNamed:highName] forState:UIControlStateHighlighted];
+    }
+    //背景图片
+    if (backImageName != nil) {
+        [button setBackgroundImage:[UIImage imageNamed:backImageName] forState:UIControlStateNormal];
+        
+        NSString *backHighlighted = [NSString stringWithFormat:@"%@_highlighted", backImageName];
+        [button setBackgroundImage:[UIImage imageNamed:backHighlighted] forState:UIControlStateHighlighted];
+    }
+    // 监听方法
+    if (action != nil) {
+        [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    }
+    return button;
+}
 
-
++ (instancetype)buttonWithTitle:(NSString *)title titleColor:(UIColor *)titleColor fontSize:(CGFloat )size imageName:(NSString *)imageName HighlightedImageName:(NSString *)highName target:(id)target action:(SEL)action{
+    return [self buttonWithTitle:title titleColor:titleColor fontSize:size imageName:imageName HighlightedImageName:highName target:target action:action backImageName:nil];
+}
 
 
 @end

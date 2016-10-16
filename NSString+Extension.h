@@ -5,7 +5,7 @@
 //  Created by 李震 on 16/8/5.
 //  Copyright © 2016年 lizhen. All rights reserved.
 //
-
+#import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
 @interface NSString (Extension)
@@ -61,5 +61,30 @@
 
 //判断文件大小
 - (long long)fileSize;
+
+//汉字的拼音
+- (NSString *)pinyin;
+
+//获取字符串(或汉字)首字母
++ (NSString *)firstCharacterWithString:(NSString *)string;
+//将字符串数组按照元素首字母顺序进行排序分组
++ (NSMutableArray *)dictionaryOrderByCharacterWithOriginalArray:(NSArray *)array;
+//获取索引字母
++ (NSMutableArray *)getReferenceCharWithArr:(NSMutableArray *)array;
+
+//判断字符串中是否含有中文
++ (BOOL)isHaveChineseInString:(NSString *)string;
+
+//判断字符串是否全部为数字
++ (BOOL)isAllNum:(NSString *)string;
+
+//压缩图片到指定文件大小
++ (NSData *)compressOriginalImage:(UIImage *)image toMaxDataSizeKBytes:(CGFloat)size;
+
+/** 将数据转换为json格式 */
++ (NSString*)JSONWithSomeThing:(id)data;
+
+/** 时间戳转换为时间 */
++ (NSString *)timeWithTimeIntervalString:(NSString *)timeString;
 
 @end

@@ -12,10 +12,9 @@
 
 - (BOOL) isValidateMobile {
     //手机号以13, 15, 17, 18开头，八个 \d 数字字符
-    NSString *phoneRegex = @"^((13[0-9])|(15[^4,\\D])|(17[0-9])|(18[0,0-9]))\\d{8}$";
-    NSPredicate *phoneTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",phoneRegex];
-    //    NSLog(@"phoneTest is %@",phoneTest);
-    return [phoneTest evaluateWithObject:self];
+    NSString * phoneRegex = @"^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$";
+    NSPredicate * regextestmobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", phoneRegex];
+    return [regextestmobile evaluateWithObject:self];
 }
 
 - (BOOL)validateIdentityCard{
@@ -305,5 +304,143 @@
         return [attr[NSFileSize] longLongValue];
     }
 }
+
+//汉字的拼音
+- (NSString *)pinyin{
+    NSMutableString *str = [self mutableCopy];
+    CFStringTransform(( CFMutableStringRef)str, NULL, kCFStringTransformMandarinLatin, NO);
+    CFStringTransform((CFMutableStringRef)str, NULL, kCFStringTransformStripDiacritics, NO);
+    
+    return [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+}
+
+//获取字符串(或汉字)首字母
++ (NSString *)firstCharacterWithString:(NSString *)string{
+    NSMutableString *str = [NSMutableString stringWithString:string];
+    CFStringTransform((CFMutableStringRef)str, NULL, kCFStringTransformMandarinLatin, NO);
+    CFStringTransform((CFMutableStringRef)str, NULL, kCFStringTransformStripDiacritics, NO);
+    NSString *pingyin = [str capitalizedString];
+    return [pingyin substringToIndex:1];
+}
+//将字符串数组按照元素首字母顺序进行排序分组
++ (NSMutableArray *)dictionaryOrderByCharacterWithOriginalArray:(NSArray *)array{
+    if (array.count == 0) {
+        return nil;
+    }
+    for (id obj in array) {
+        if (![obj isKindOfClass:[NSString class]]) {
+            return nil;
+        }
+    }
+    UILocalizedIndexedCollation * indexedCollation = [UILocalizedIndexedCollation currentCollation];
+    NSMutableArray *objects = [NSMutableArray arrayWithCapacity:indexedCollation.sectionTitles.count];
+    //创建27个分组数组
+    for (int i = 0; i < indexedCollation.sectionTitles.count; i++) {
+        NSMutableArray *obj = [NSMutableArray array];
+        [objects addObject:obj];
+    }
+    //按字母顺序进行分组
+    NSInteger lastIndex = -1;
+    for (int i = 0; i < array.count; i++) {
+        NSInteger index = [indexedCollation sectionForObject:array[i] collationStringSelector:@selector(uppercaseString)];
+        [[objects objectAtIndex:index] addObject:array[i]];
+        lastIndex = index;
+    }
+    //去掉空数组
+    for (int i = 0; i < objects.count; i++) {
+        NSMutableArray *obj = objects[i];
+        if (obj.count == 0) {
+            [objects removeObject:obj];
+        }
+    }
+    return objects;
+    
+}
+//获取索引字母
++ (NSMutableArray *)getReferenceCharWithArr:(NSMutableArray *)array{
+//    NSMutableArray *keys = [NSMutableArray arrayWithCapacity:objects.count];
+    NSMutableArray * keys = [NSMutableArray array];
+    for (NSMutableArray *obj in array) {
+        NSString *str = obj[0];
+        NSString *key = [self firstCharacterWithString:str];
+        [keys addObject:key];
+    }
+    NSString * str = [keys lastObject];
+    unichar c=[str characterAtIndex:0];
+    if ((c<'A'||c>'Z')&&(c<'a'||c>'z')) {
+        [keys removeLastObject];
+        [keys addObject:@"#"];
+    }
+    
+    return keys;
+}
+
+//判断字符串中是否含有中文
++ (BOOL)isHaveChineseInString:(NSString *)string{
+    for(NSInteger i = 0; i < [string length]; i++){
+        int a = [string characterAtIndex:i];
+        if (a > 0x4e00 && a < 0x9fff) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+//判断字符串是否全部为数字
++ (BOOL)isAllNum:(NSString *)string{
+    unichar c;
+    for (int i=0; i<string.length; i++) {
+        c=[string characterAtIndex:i];
+        if (!isdigit(c)) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+//压缩图片到指定文件大小
++ (NSData *)compressOriginalImage:(UIImage *)image toMaxDataSizeKBytes:(CGFloat)size{
+    NSData *data = UIImageJPEGRepresentation(image, 1.0);
+    CGFloat dataKBytes = data.length/1000.0;
+    CGFloat maxQuality = 0.9f;
+    CGFloat lastData = dataKBytes;
+    while (dataKBytes > size && maxQuality > 0.01f) {
+        maxQuality = maxQuality - 0.01f;
+        data = UIImageJPEGRepresentation(image, maxQuality);
+        dataKBytes = data.length/1000.0;
+        if (lastData == dataKBytes) {
+            break;
+        }else{
+            lastData = dataKBytes;
+        }
+    }
+    return data;
+}
+
++ (NSString*)JSONWithSomeThing:(id)data{
+    
+    NSError *parseError = nil;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:NSJSONWritingPrettyPrinted error:&parseError];
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+}
+
++ (NSString *)timeWithTimeIntervalString:(NSString *)timeString{
+    // 格式化时间
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    formatter.timeZone = [NSTimeZone timeZoneWithName:@"shanghai"];
+    [formatter setDateStyle:NSDateFormatterMediumStyle];
+    [formatter setTimeStyle:NSDateFormatterShortStyle];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm"];
+    
+    // 毫秒值转化为秒
+    NSDate* date = [NSDate dateWithTimeIntervalSince1970:[timeString doubleValue]/ 1000.0];
+    NSString* dateString = [formatter stringFromDate:date];
+    return dateString;
+}
+
+
 
 @end

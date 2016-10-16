@@ -61,6 +61,6 @@
  *
  *  @return CGSize
  */
-+ (CGSize)getImageSizeWithURL:(id)imageURL
++ (CGSize)getImageSizeWithURL:(id)imageURL;
 
 @end
